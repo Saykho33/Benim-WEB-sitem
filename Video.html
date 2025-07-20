@@ -101,7 +101,6 @@
             return;
           }
 
-          // İlk 6 sonucu göster
           data.items.slice(0, 6).forEach(video => {
             if (video.type === "video") {
               const iframe = document.createElement("iframe");
@@ -114,4 +113,10 @@
         })
         .catch(err => {
           console.error("Hata:", err);
-          resultsDiv.innerHTML = "Bir
+          resultsDiv.innerHTML = "Bir hata oluştu.";
+        });
+    }
+  </script>
+
+</body>
+</html>
