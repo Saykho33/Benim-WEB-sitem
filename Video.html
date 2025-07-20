@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Video Oynatıcı</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Arama - Piped API</title>
   <style>
     body {
       background-color: #121212;
       color: #fff;
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
     }
 
     nav {
@@ -24,43 +22,96 @@
 
     a {
       color: #90caf9;
-      text-decoration: none;
       margin: 0 0.5rem;
+      text-decoration: none;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    #searchInput {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+      width: 300px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+    }
+
+    .video-container {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 1000px;
     }
 
     iframe {
       width: 100%;
-      max-width: 720px;
-      height: 405px;
+      height: 180px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-    }
-
-    footer {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      opacity: 0.6;
+      border: none;
     }
   </style>
 </head>
 <body>
+
   <nav>
     <a href="index.html">Ana Sayfa</a> |
-    <a href="video.html">Video Oynatıcı</a>
+    <a href="video.html">Video Arama</a>
   </nav>
 
-  <h1>Video Oynatıcı</h1>
+  <h1>Video Arama</h1>
 
-  <iframe 
-    src="https://www.youtube.com/embed/1JlmCjduRtw?si=K5wE3A_RNHhFa63E" 
-    title="YouTube video player"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    allowfullscreen>
-  </iframe>
+  <div>
+    <input type="text" id="searchInput" placeholder="Bir şeyler ara..." />
+    <button onclick="searchVideos()">Ara</button>
+  </div>
 
-  <footer>
-    &copy; 2025 Benim Video Oynatıcım
-  </footer>
-</body>
-</html>
+  <div class="video-container" id="results"></div>
+
+  <script>
+    function searchVideos() {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "Yükleniyor...";
+
+      if (!query) {
+        resultsDiv.innerHTML = "Lütfen bir arama terimi girin.";
+        return;
+      }
+
+      fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          resultsDiv.innerHTML = "";
+
+          if (!data.items || data.items.length === 0) {
+            resultsDiv.innerHTML = "Sonuç bulunamadı.";
+            return;
+          }
+
+          // İlk 6 sonucu göster
+          data.items.slice(0, 6).forEach(video => {
+            if (video.type === "video") {
+              const iframe = document.createElement("iframe");
+              iframe.src = `https://www.youtube.com/embed/${video.id}`;
+              iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+              iframe.allowFullscreen = true;
+              resultsDiv.appendChild(iframe);
+            }
+          });
+        })
+        .catch(err => {
+          console.error("Hata:", err);
+          resultsDiv.innerHTML = "Bir
